@@ -1,0 +1,258 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iPad Air・Pro 選び診断</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: 1問ずつ表示するカード型の診断。上に進捗バー、最後に結果（モデル＋サイズ＋容量＋通信）と理由 */
+:root{
+  --bg:#ffffff;
+  --panel:#f5f7f9;
+  --line:#e2e6ea;
+  --ink:#1d2329;
+  --muted:#66707a;
+  --accent:#1f6feb;
+  --accent-soft:#e8f0fd;
+  --air:#2a9d8f;
+  --air-soft:#e6f4f2;
+  --pro:#1d2329;
+  --font:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
+.wrap{max-width:580px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+header h1{font-size:1.5rem;font-weight:900;margin:0;text-wrap:balance;letter-spacing:.02em}
+header p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+.progress{display:flex;align-items:center;gap:12px;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;background:var(--panel);border-radius:3px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);transition:width .3s}
+.cat{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--accent);background:var(--accent-soft);padding:2px 10px;border-radius:999px}
+.q{font-size:1.2rem;font-weight:700;margin:8px 0 0;text-wrap:balance}
+.hint{color:var(--muted);font-size:.85rem;margin:4px 0 0}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);transition:border-color .15s,background .15s}
+.opt b{font-size:.98rem;line-height:1.5}
+.opt small{font-size:.8rem;color:var(--muted);line-height:1.5}
+.opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+.opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.nav{display:flex;justify-content:space-between;gap:12px}
+.ghost{all:unset;cursor:pointer;color:var(--muted);font-size:.9rem;padding:6px 2px}
+.ghost:hover{color:var(--ink)}
+.ghost:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ghost[disabled]{visibility:hidden}
+.result{display:flex;flex-direction:column;gap:24px}
+.verdict{padding:24px 20px;border-radius:16px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+.verdict .label{font-size:.75rem;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.verdict .name{font-size:2rem;font-weight:900;line-height:1.25;margin-top:2px}
+.verdict .name.air{color:var(--air)}
+.verdict .name.pro{color:var(--pro)}
+.verdict .lead{margin:0}
+.spec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.spec div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.spec span{display:block;font-size:.72rem;color:var(--muted);font-weight:700}
+.spec strong{font-size:1rem}
+@media (max-width:420px){.spec{grid-template-columns:1fr}}
+.meter{display:flex;flex-direction:column;gap:6px}
+.meter .row{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);font-weight:700}
+.track{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--air),var(--line) 50%,var(--pro))}
+.tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--muted);opacity:.5}
+.dot{position:absolute;top:50%;width:20px;height:20px;border-radius:50%;background:var(--bg);border:4px solid var(--accent);transform:translate(-50%,-50%);transition:left .5s}
+.meter p{margin:0;font-size:.82rem;color:var(--muted)}
+h2{font-size:1rem;margin:0 0 8px;font-weight:700}
+ul.reasons{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.alt{padding:14px 16px;border-radius:12px;background:var(--air-soft);font-size:.9rem}
+.alt.toPro{background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;width:26%}
+thead th{color:var(--ink);font-weight:700}
+.tbl{overflow-x:auto}
+details{border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+summary{cursor:pointer;font-weight:700;font-size:.92rem}
+.answers{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:.85rem}
+.answers li{display:flex;flex-direction:column}
+.answers span{color:var(--muted);font-size:.78rem}
+.restart{all:unset;cursor:pointer;text-align:center;padding:14px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700}
+.restart:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.note{font-size:.78rem;color:var(--muted);margin:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header>
+    <h1>iPad Air・Pro 選び診断</h1>
+    <p>9つの質問に答えると、合うモデル・サイズ・容量・通信タイプが分かります</p>
+  </header>
+
+  <section id="quiz">
+    <div class="progress"><span id="count"></span><div class="bar"><span id="fill"></span></div></div>
+    <div style="margin-top:20px">
+      <span class="cat" id="qcat"></span>
+      <p class="q" id="qtext"></p>
+      <p class="hint" id="qhint"></p>
+    </div>
+    <div class="opts" id="opts" style="margin-top:16px"></div>
+    <div class="nav" style="margin-top:16px">
+      <button class="ghost" id="back" type="button">← 前の質問へ</button>
+    </div>
+  </section>
+
+  <section id="result" class="result" hidden>
+    <div class="verdict">
+      <div>
+        <div class="label">あなたにおすすめ</div>
+        <div class="name" id="rname"></div>
+      </div>
+      <p class="lead" id="rlead"></p>
+      <div class="spec">
+        <div><span>サイズ</span><strong id="rsize"></strong></div>
+        <div><span>容量</span><strong id="rstorage"></strong></div>
+        <div><span>通信</span><strong id="rnet"></strong></div>
+      </div>
+    </div>
+
+    <div class="meter">
+      <div class="row"><span>Air向き</span><span>Pro向き</span></div>
+      <div class="track"><div class="tick" id="rtick"></div><div class="dot" id="rdot" style="left:50%"></div></div>
+      <p>線より右ならPro、左ならAirがおすすめです。</p>
+    </div>
+
+    <div>
+      <h2>そう判断した理由</h2>
+      <ul class="reasons" id="rreasons"></ul>
+    </div>
+
+    <div class="alt" id="ralt" hidden></div>
+
+    <div>
+      <h2>2モデルの主な違い</h2>
+      <div class="tbl">
+        <table>
+          <thead><tr><th></th><th>iPad Air</th><th>iPad Pro</th></tr></thead>
+          <tbody>
+            <tr><th>チップ</th><td>M4</td><td>M5（より高性能）</td></tr>
+            <tr><th>AI処理</th><td>Apple Intelligence対応。日常のAI機能は快適</td><td>Neural Engineが強化され、AIを使う編集や画像生成に余裕</td></tr>
+            <tr><th>画面</th><td>液晶 Liquid Retina／60Hz</td><td>有機EL Ultra Retina XDR／120Hz</td></tr>
+            <tr><th>明るさ</th><td>屋内なら十分</td><td>より明るく屋外でも見やすい</td></tr>
+            <tr><th>Pencil・キーボード</th><td colspan="2">どちらも Apple Pencil Pro／Magic Keyboard 対応</td></tr>
+            <tr><th>価格</th><td>手頃</td><td>高め</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <details>
+      <summary>あなたの回答を見る</summary>
+      <ul class="answers" id="ranswers"></ul>
+    </details>
+
+    <button class="restart" id="restart" type="button">もう一度診断する</button>
+    <p class="note">2026年10月時点の現行モデル（iPad Air M4／iPad Pro M5）をもとにしています。価格・容量の選択肢は購入前にApple公式でご確認ください。</p>
+  </section>
+</div>
+
+<script>
+const Q=[
+ {c:"使い方",t:"iPadで一番やりたいことは？",h:"いちばん多い使い方を選んでください",o:[
+  {l:"資料作り・メール・SNS投稿・メモ",p:0,r:"資料作り・SNS・メモ中心ならAirの性能で十分"},
+  {l:"写真の加工や、短い動画の編集",p:1,r:"写真加工や短い動画ならAirでも快適。余裕を持つならPro"},
+  {l:"リールやYouTubeなど、動画編集を頻繁にする",p:3,r:"動画編集を頻繁にするなら、M5チップのProが快適"}]},
+ {c:"AI",t:"iPadでAIを使う？",h:"使い方によって必要な性能が変わります",o:[
+  {l:"ほとんど使わない",p:0,r:null},
+  {l:"ChatGPTやClaudeなどのAIアプリで文章作り・相談",d:"処理はネット上で行うので、iPad側の性能はほぼ関係ありません",p:0,r:"AIアプリで文章作りや相談をするだけなら、Airで十分"},
+  {l:"Apple Intelligenceの文章作成・要約をよく使う",d:"iPad本体で処理するAI機能",p:1,r:"Apple Intelligenceはどちらも対応。よく使うなら処理の速いProが快適"},
+  {l:"AIで画像を作る・AI機能つきの写真/動画編集をたくさんする",d:"背景の切り抜き、自動補正、AI画像生成など",p:2,r:"AIを使った画像生成や編集が多いなら、AI処理が強化されたProが向いている"}]},
+ {c:"Pencil",t:"Apple Pencilで絵を描いたり、細かく書き込んだりする？",h:"",o:[
+  {l:"ほとんど使わない",p:0,r:null},
+  {l:"メモや簡単な書き込み程度",p:0,r:null},
+  {l:"イラストやデザインをよく描く",p:2,r:"よく描くなら120HzのProの方が線がなめらか"}]},
+ {c:"画面",t:"画面の綺麗さ（発色・黒の深さ）にこだわる？",h:"商品写真の色味チェックや映画鑑賞など",o:[
+  {l:"普通に見えれば十分",p:0,r:"画面は「普通に見えれば十分」ならAirの液晶で満足できる"},
+  {l:"できれば綺麗な方がいい",p:1,r:null},
+  {l:"かなりこだわりたい",p:2,r:"発色重視なら有機ELのProがはっきり上"}]},
+ {c:"場所",t:"屋外や明るい窓際で使うことは多い？",h:"",o:[
+  {l:"ほぼ屋内",p:0,r:null},
+  {l:"ときどき屋外",p:1,r:null},
+  {l:"屋外での利用が多い",p:2,r:"屋外で使うなら、より明るいProの方が見やすい"}]},
+ {c:"予算",t:"予算の考え方は？",h:"",o:[
+  {l:"できるだけ抑えたい",p:-2,r:"予算を抑えたいならAir。浮いた分でPencilやキーボードを揃えられる"},
+  {l:"必要なら少し上乗せしてもいい",p:0,r:null},
+  {l:"長く使う道具なので投資する",p:2,r:"長く使う前提なら、性能に余裕のあるProの方が安心"}]},
+ {c:"サイズ",t:"画面サイズはどちらがいい？",h:"Air・Proどちらも2サイズあります",o:[
+  {l:"持ち歩きやすさ重視（11インチ）",p:0,s:"11インチ"},
+  {l:"作業のしやすさ重視（13インチ）",p:0,s:"13インチ"},
+  {l:"迷っている",p:0,s:null}]},
+ {c:"容量",t:"写真や動画をiPadにどれくらい保存する？",h:"",o:[
+  {l:"ほぼクラウドに保存する・あまり残さない",p:0,st:"256GB"},
+  {l:"写真や動画をそれなりに入れておく",p:0,st:"512GB"},
+  {l:"動画素材をたくさん入れて編集する",p:1,st:"1TB以上",r:"動画素材を大量に入れるなら1TB以上が安心"}]},
+ {c:"通信",t:"Wi-Fiがない外出先でもネットを使う？",h:"",o:[
+  {l:"自宅や職場のWi-Fiだけで使う",p:0,n:"Wi-Fiモデル"},
+  {l:"スマホのテザリングで十分",p:0,n:"Wi-Fiモデル"},
+  {l:"外出先で単体でつなぎたい",p:0,n:"Wi-Fi＋Cellular",r:"外で単体でつなぐならCellularモデル（SIM契約が必要）"}]}
+];
+const THRESH=5,MIN=-2,MAX=15;
+let i=0;const ans=[];
+const $=id=>document.getElementById(id);
+function render(){
+  const q=Q[i];
+  $("count").textContent=(i+1)+" / "+Q.length;
+  $("fill").style.width=((i+1)/Q.length*100)+"%";
+  $("qcat").textContent=q.c;
+  $("qtext").textContent=q.t;
+  $("qhint").textContent=q.h;$("qhint").hidden=!q.h;
+  $("back").disabled=i===0;
+  const box=$("opts");box.innerHTML="";
+  q.o.forEach((o,k)=>{
+    const b=document.createElement("button");
+    b.type="button";b.className="opt"+(ans[i]===k?" sel":"");b.id="q"+i+"o"+k;
+    const t=document.createElement("b");t.textContent=o.l;b.appendChild(t);
+    if(o.d){const s=document.createElement("small");s.textContent=o.d;b.appendChild(s)}
+    b.onclick=()=>{ans[i]=k;b.classList.add("sel");setTimeout(()=>{i<Q.length-1?(i++,render()):show()},160)};
+    box.appendChild(b);
+  });
+}
+const pos=v=>Math.max(4,Math.min(96,(v-MIN)/(MAX-MIN)*100));
+function show(){
+  let score=0;const reasons=[];
+  Q.forEach((q,n)=>{const o=q.o[ans[n]];score+=o.p;if(o.r)reasons.push(o.r)});
+  const isPro=score>=THRESH;
+  const get=c=>Q.find(q=>q.c===c).o[ans[Q.findIndex(q=>q.c===c)]];
+  let size=get("サイズ").s;
+  if(!size){
+    const heavy=ans[0]===2||ans[2]===2;
+    size=heavy?"13インチ":"11インチ";
+    reasons.push(heavy?"動画編集やイラストが多いなら、作業スペースの広い13インチが便利":"サイズに迷ったら、持ち歩きやすく価格も抑えられる11インチがおすすめ");
+  }
+  let storage=get("容量").st;
+  if(ans[0]===2&&storage==="256GB")storage="512GB";
+  $("rname").textContent=isPro?"iPad Pro":"iPad Air";
+  $("rname").className="name "+(isPro?"pro":"air");
+  $("rlead").textContent=isPro
+    ?"作業の重さや画面へのこだわりから、性能と画面に余裕のあるProが合っています。"
+    :"今の使い方なら、Airで十分快適です。価格を抑えつつ、必要な機能はそろっています。";
+  $("rsize").textContent=size;$("rstorage").textContent=storage;$("rnet").textContent=get("通信").n;
+  if(!reasons.length)reasons.push("日常的な使い方が中心なので、Airの性能で困る場面はほぼありません");
+  $("rreasons").innerHTML="";
+  reasons.forEach(r=>{const li=document.createElement("li");li.textContent=r;$("rreasons").appendChild(li)});
+  const alt=$("ralt");const gap=score-THRESH;
+  if(!isPro&&gap>=-2){alt.hidden=false;alt.className="alt toPro";alt.textContent="Proとのボーダーに近い結果です。動画編集やAI機能を今後増やす予定があれば、Proも検討の価値があります。"}
+  else if(isPro&&gap<=1){alt.hidden=false;alt.className="alt";alt.textContent="Airとのボーダーに近い結果です。画面の綺麗さにそこまでこだわらなければ、Airにして差額を周辺機器に回すのもありです。"}
+  else alt.hidden=true;
+  const al=$("ranswers");al.innerHTML="";
+  Q.forEach((q,n)=>{const li=document.createElement("li");const s=document.createElement("span");s.textContent=q.t;li.appendChild(s);li.appendChild(document.createTextNode(q.o[ans[n]].l));al.appendChild(li)});
+  $("rtick").style.left=pos(THRESH-0.5)+"%";
+  $("quiz").hidden=true;$("result").hidden=false;
+  requestAnimationFrame(()=>{$("rdot").style.left=pos(score)+"%"});
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("back").onclick=()=>{if(i>0){i--;render()}};
+$("restart").onclick=()=>{i=0;ans.length=0;$("rdot").style.left="50%";$("result").hidden=true;$("quiz").hidden=false;render()};
+render();
+</script>
+</body></html>
