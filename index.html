@@ -56,6 +56,11 @@ header p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
 .spec span{display:block;font-size:.72rem;color:var(--muted);font-weight:700}
 .spec strong{font-size:1rem}
 @media (max-width:420px){.spec{grid-template-columns:1fr}}
+[hidden]{display:none!important}
+.price{display:flex;flex-direction:column;gap:4px;padding-top:14px;border-top:1px solid var(--line)}
+.price span{font-size:.72rem;color:var(--muted);font-weight:700}
+.price strong{font-size:1.8rem;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.3}
+.price small{font-size:.85rem;color:var(--muted)}
 .meter{display:flex;flex-direction:column;gap:6px}
 .meter .row{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);font-weight:700}
 .track{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--air),var(--line) 50%,var(--pro))}
@@ -114,6 +119,11 @@ summary{cursor:pointer;font-weight:700;font-size:.92rem}
         <div><span>容量</span><strong id="rstorage"></strong></div>
         <div><span>通信</span><strong id="rnet"></strong></div>
       </div>
+      <div class="price">
+        <span>この構成のApple公式価格（税込）</span>
+        <strong id="rprice"></strong>
+        <small id="rcompare"></small>
+      </div>
     </div>
 
     <div class="meter">
@@ -140,7 +150,8 @@ summary{cursor:pointer;font-weight:700;font-size:.92rem}
             <tr><th>画面</th><td>液晶 Liquid Retina／60Hz</td><td>有機EL Ultra Retina XDR／120Hz</td></tr>
             <tr><th>明るさ</th><td>屋内なら十分</td><td>より明るく屋外でも見やすい</td></tr>
             <tr><th>Pencil・キーボード</th><td colspan="2">どちらも Apple Pencil Pro／Magic Keyboard 対応</td></tr>
-            <tr><th>価格</th><td>手頃</td><td>高め</td></tr>
+            <tr><th>価格（11インチ・Wi-Fi）</th><td>129,800円〜（128GB）</td><td>209,800円〜（256GB）</td></tr>
+            <tr><th>価格（13インチ・Wi-Fi）</th><td>169,800円〜（128GB）</td><td>269,800円〜（256GB）</td></tr>
           </tbody>
         </table>
       </div>
@@ -152,7 +163,7 @@ summary{cursor:pointer;font-weight:700;font-size:.92rem}
     </details>
 
     <button class="restart" id="restart" type="button">もう一度診断する</button>
-    <p class="note">2026年10月時点の現行モデル（iPad Air M4／iPad Pro M5）をもとにしています。価格・容量の選択肢は購入前にApple公式でご確認ください。</p>
+    <p class="note">2026年10月時点の現行モデル（iPad Air M4／iPad Pro M5）をもとにしています。価格は2026年10月時点のApple公式ストアの税込価格です。Apple PencilやMagic Keyboardは別売りです。</p>
   </section>
 </div>
 
@@ -196,6 +207,13 @@ const Q=[
   {l:"スマホのテザリングで十分",p:0,n:"Wi-Fiモデル"},
   {l:"外出先で単体でつなぎたい",p:0,n:"Wi-Fi＋Cellular",r:"外で単体でつなぐならCellularモデル（SIM契約が必要）"}]}
 ];
+const PRICE={
+ Air:{"11インチ":{"128GB":[129800,154800],"256GB":[146800,171800],"512GB":[181800,206800],"1TB":[231800,256800]},
+      "13インチ":{"128GB":[169800,194800],"256GB":[186800,211800],"512GB":[221800,246800],"1TB":[271800,296800]}},
+ Pro:{"11インチ":{"256GB":[209800,244800],"512GB":[244800,279800],"1TB":[314800,349800],"2TB":[404800,439800]},
+      "13インチ":{"256GB":[269800,304800],"512GB":[304800,339800],"1TB":[374800,409800],"2TB":[464800,499800]}}
+};
+const yen=n=>n.toLocaleString("ja-JP")+"円";
 const THRESH=5,MIN=-2,MAX=15;
 let i=0;const ans=[];
 const $=id=>document.getElementById(id);
@@ -237,6 +255,12 @@ function show(){
     ?"作業の重さや画面へのこだわりから、性能と画面に余裕のあるProが合っています。"
     :"今の使い方なら、Airで十分快適です。価格を抑えつつ、必要な機能はそろっています。";
   $("rsize").textContent=size;$("rstorage").textContent=storage;$("rnet").textContent=get("通信").n;
+  const st=storage==="1TB以上"?"1TB":storage;
+  const ni=get("通信").n==="Wi-Fiモデル"?0:1;
+  const me=isPro?"Pro":"Air",other=isPro?"Air":"Pro";
+  const myPrice=PRICE[me][size][st][ni],otherPrice=PRICE[other][size][st][ni];
+  $("rprice").textContent=yen(myPrice);
+  $("rcompare").textContent="同じ条件のiPad "+other+"は"+yen(otherPrice)+"（差額 "+yen(Math.abs(otherPrice-myPrice))+"）"+(storage==="1TB以上"?"／Proは2TBも選べます":"");
   if(!reasons.length)reasons.push("日常的な使い方が中心なので、Airの性能で困る場面はほぼありません");
   $("rreasons").innerHTML="";
   reasons.forEach(r=>{const li=document.createElement("li");li.textContent=r;$("rreasons").appendChild(li)});
@@ -256,4 +280,3 @@ $("restart").onclick=()=>{i=0;ans.length=0;$("rdot").style.left="50%";$("result"
 render();
 </script>
 </body></html>
-<style>[hidden]{display:none!important}</style>
